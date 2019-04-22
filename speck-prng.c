@@ -61,7 +61,6 @@ void generate_block_ctr(size_t output_length, uint8_t *output_block, uint8_t *se
     
     for(i = 0; i < rounds; i++){
        speck_encrypt(output, ctr, key);
-       printf("i %ld\n", i);
        ((uint64_t *)output_block)[j + 1] = output[1];
        ((uint64_t *)output_block)[j + 0] = output[0];
        ctr[0]++;
