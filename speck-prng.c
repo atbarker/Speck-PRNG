@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <syscall.h>
 
 //block size in bytes
 #define BLOCK_SIZE 16
@@ -44,8 +46,8 @@ void speck_encrypt(uint64_t ct[2], uint64_t const pt[2], uint64_t const K[2])
  */
 void generate_block_ctr(size_t output_length, uint8_t *output_block, uint8_t *seed){
     uint32_t rounds = output_length/BLOCK_SIZE;
-    uint64_t i, ctr[2], key[2], output[2], j;
-    uint8_t *block = malloc(16);
+    uint64_t i, ctr[2], key[2], output[2];
+    uint64_t j = 0;
 
     if(output_length % BLOCK_SIZE != 0){
         printf("Not aligned to 128 bit boundary\n");
@@ -59,19 +61,20 @@ void generate_block_ctr(size_t output_length, uint8_t *output_block, uint8_t *se
     
     for(i = 0; i < rounds; i++){
        speck_encrypt(output, ctr, key);
+       printf("i %ld\n", i);
        ((uint64_t *)output_block)[j + 1] = output[1];
        ((uint64_t *)output_block)[j + 0] = output[0];
        ctr[0]++;
        j += 2;
     }
-
-    free(block);
 }
 
 /**
  * Get a random 128 bit number as our key/seed
  * This must be from a cryptographically secure RNG
  */
-uint64_t* get_seed_64(){
-    return 0;
+uint8_t *get_seed_64(){
+    uint8_t *random = malloc(16);
+    syscall(SYS_getrandom, random, 16, 0);
+    return random;
 }
