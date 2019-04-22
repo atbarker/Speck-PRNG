@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 //block size in bytes
 #define BLOCK_SIZE 16
@@ -20,6 +21,7 @@
  *k: key
  *we assume that input arrays are of length 2 so we get 128 bit numbers
  *Should generate the key on the fly, just for simplicity sake
+ *Better performance can be had by computing round keys once.
  */
 void speck_encrypt(uint64_t ct[2], uint64_t const pt[2], uint64_t const K[2])
 {
@@ -41,19 +43,25 @@ void speck_encrypt(uint64_t ct[2], uint64_t const pt[2], uint64_t const K[2])
  * We assume a length of 2 for the seed.
  */
 void generate_block_ctr(size_t output_length, uint8_t *output_block, uint8_t *seed){
-    int rounds = output_length/BLOCK_SIZE;
-    uint64_t i, nonce[2], key[2], key[68], x, y, j;
+    uint32_t rounds = output_length/BLOCK_SIZE;
+    uint64_t i, ctr[2], key[2], output[2], j;
     uint8_t *block = malloc(16);
 
     if(output_length % BLOCK_SIZE != 0){
         printf("Not aligned to 128 bit boundary\n");
     }
+
+    key[0] = ((uint64_t *)seed)[0];
+    key[1] = ((uint64_t *)seed)[1];
+
+    ctr[0] = 0;
+    ctr[1] = 0;
     
     for(i = 0; i < rounds; i++){
-       x = nonce[1]; y=nonce[0]; nonce[0]++;
-       speck_encrypt(&x, &y, key);
-       ((uint64_t *)output_block)[j + 1] = x;
-       ((uint64_t *)output_block)[j + 0] = y;
+       speck_encrypt(output, ctr, key);
+       ((uint64_t *)output_block)[j + 1] = output[1];
+       ((uint64_t *)output_block)[j + 0] = output[0];
+       ctr[0]++;
        j += 2;
     }
 
@@ -65,5 +73,5 @@ void generate_block_ctr(size_t output_length, uint8_t *output_block, uint8_t *se
  * This must be from a cryptographically secure RNG
  */
 uint64_t* get_seed_64(){
-
+    return 0;
 }
