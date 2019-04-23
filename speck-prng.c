@@ -4,13 +4,8 @@
 #include <unistd.h>
 #include <syscall.h>
 
-//block size in bytes
+//block size in bytes, key size is assumed to be the same
 #define BLOCK_SIZE 16
-#define KEY_SIZE 16
-
-/**
- * Initial encrypt function obtained from wikipedia 
- */
 
 #define ROR(x, r) ((x >> r) | (x << (64 - r)))
 #define ROL(x, r) ((x << r) | (x >> (64 - r)))
@@ -24,6 +19,7 @@
  *we assume that input arrays are of length 2 so we get 128 bit numbers
  *Should generate the key on the fly, just for simplicity sake
  *Better performance can be had by computing round keys once.
+ *This function is obtained from the linked paper, https://eprint.iacr.org/2013/404
  */
 void speck_encrypt(uint64_t ct[2], uint64_t const pt[2], uint64_t const K[2])
 {
