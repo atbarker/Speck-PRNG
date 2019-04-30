@@ -68,8 +68,8 @@ void generate_block_ctr(size_t output_length, uint8_t *output_block, uint8_t *se
  * Get a random 128 bit number as our key/seed
  * This must be from a cryptographically secure RNG
  */
-uint8_t *get_seed_64(){
-    uint8_t *random = malloc(16);
+uint64_t * get_seed_64(){
+    static uint64_t random[2];
     syscall(SYS_getrandom, random, 16, 0);
     return random;
 }

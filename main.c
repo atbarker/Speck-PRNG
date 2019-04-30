@@ -55,14 +55,13 @@ void hexDump (char *desc, void *addr, uint32_t len) {
 
 
 int main(){
-    uint8_t *key = get_seed_64();
+    uint8_t *key = (uint8_t *)get_seed_64();
     uint8_t *block = malloc(BLOCK_SIZE);
 
     generate_block_ctr(BLOCK_SIZE, block, key);
 
     hexDump("random data", block, BLOCK_SIZE);
 
-    free(key);
     free(block);
     return 0;
 }
