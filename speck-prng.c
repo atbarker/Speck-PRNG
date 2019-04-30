@@ -13,13 +13,13 @@
 #define ROUNDS 32
 
 /**
- *pt: plaintext
- *ct: ciphertext
- *k: key
- *we assume that input arrays are of length 2 so we get 128 bit numbers
- *Should generate the key on the fly, just for simplicity sake
- *Better performance can be had by computing round keys once.
- *This function is obtained from the linked paper, https://eprint.iacr.org/2013/404
+ * pt: plaintext
+ * ct: ciphertext
+ * k: key
+ * we assume that input arrays are of length 2 so we get 128 bits
+ * Should generate the key on the fly, just for simplicity sake
+ * Better performance can be had by computing round keys once.
+ * This function is obtained from the following paper, https://eprint.iacr.org/2013/404
  */
 void speck_encrypt(uint64_t ct[2], uint64_t const pt[2], uint64_t const K[2])
 {
@@ -36,9 +36,12 @@ void speck_encrypt(uint64_t ct[2], uint64_t const pt[2], uint64_t const K[2])
 }
 
 /**
+ * output_length: size of the output block
+ * output_block: destination for pseudorandom bits
+ * seed: a 128 bit random number
  * Generate a block of random bytes given a key (seed) by running speck in counter mode
  * block input should be aligned to 128 bit (16 byte)  boundaries
- * We assume a length of 2 for the seed.
+ * We assume a length of 16 bytes (128 bits) for the seed.
  */
 void generate_block_ctr(size_t output_length, uint8_t *output_block, uint8_t *seed){
     uint32_t rounds = output_length/BLOCK_SIZE;
