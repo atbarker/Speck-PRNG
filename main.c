@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "speck-prng.h"
+#include <time.h>
+#include <string.h>
 
 #define BLOCK_SIZE 4096
 
@@ -57,10 +59,26 @@ void hexDump (char *desc, void *addr, uint32_t len) {
 int main(){
     uint8_t *key = (uint8_t *)get_seed_64();
     uint8_t *block = malloc(BLOCK_SIZE);
+    struct timespec start, end;
+    uint8_t hash[16];
 
+
+    clock_gettime(CLOCK_MONOTONIC, &start);
     generate_block_ctr(BLOCK_SIZE, block, key);
+    clock_gettime(CLOCK_MONOTONIC, &end);
 
-    hexDump("random data", block, BLOCK_SIZE);
+    printf("Time to generate random bytes in ns: %ld\n", end.tv_nsec - start.tv_nsec); 
+
+    //hexDump("random data", block, BLOCK_SIZE);
+    
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    speck_128_hash(block, BLOCK_SIZE, hash);
+    clock_gettime(CLOCK_MONOTONIC, &end);
+
+    hexDump("hash of random", hash, 16);
+    speck_128_hash(block, BLOCK_SIZE, hash);
+    hexDump("hash of random 2", hash, 16);
+    printf("Time to hash in ns: %ld\n", end.tv_nsec - start.tv_nsec);
 
     free(block);
     return 0;

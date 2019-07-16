@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <syscall.h>
 
 //block size in bytes, key size is assumed to be the same
@@ -63,6 +64,7 @@ void generate_block_ctr(size_t output_length, uint8_t *output_block, uint8_t *se
        ((uint64_t *)output_block)[j + 1] = output[1];
        ((uint64_t *)output_block)[j + 0] = output[0];
        ctr[0]++;
+       if(ctr[0] == 0) ctr[1]++;
        j += 2;
     }
 }
@@ -75,4 +77,26 @@ uint64_t * get_seed_64(){
     static uint64_t random[2];
     syscall(SYS_getrandom, random, 16, 0);
     return random;
+}
+
+void speck_128_hash(uint8_t *data, size_t data_length, uint8_t* hash){
+    uint64_t seed[2] = {0,0};
+    uint32_t rounds = data_length/BLOCK_SIZE;
+    uint64_t i, j, ctr[2], temp[2];
+    
+    j = 0;
+    ctr[0] = 0;
+    ctr[1] = 0;
+    memset(hash, 0, 16);
+
+    for(i = 0; i < rounds; i++){
+	temp[0] = ((uint64_t *)data)[j + 0];
+        temp[1] = ((uint64_t *)data)[j + 1]; 	
+        speck_encrypt(temp, ctr, seed);
+        ((uint64_t*)hash)[0] ^= temp[0];
+        ((uint64_t*)hash)[1] ^= temp[1];
+        ctr[0]++;
+        if(ctr[0] == 0) ctr[1]++;	
+	j += 2;
+    }
 }

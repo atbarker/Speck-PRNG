@@ -1,4 +1,4 @@
-GCC     = gcc -Wall -Wextra -g
+GCC     = gcc -Wall -Wextra -g -O2
 SOURCES = main.c speck-prng.c
 HEADERS = speck-prng.h
 OBJECTS = main.o speck-prng.o
